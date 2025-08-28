@@ -1,7 +1,11 @@
+import 'package:chat_app/helpers/alert.dart';
+import 'package:chat_app/services/auth_service.dart';
 import 'package:chat_app/widgets/custom_botton.dart';
 import 'package:chat_app/widgets/custom_input.dart';
 import 'package:chat_app/widgets/header.dart';
+import 'package:chat_app/widgets/label.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
@@ -20,6 +24,7 @@ class RegisterPage extends StatelessWidget {
               children: [
                 Header(title: 'Registro'),
                 _Form(),
+                Label(title: 'Ya tienes una cuenta?', subtitle: 'Ingresa ahora!', route: 'login'),
                 Container(
                   margin: EdgeInsets.only(bottom: 15),
                   child: Text(
@@ -51,9 +56,11 @@ class _FormState extends State<_Form> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-
   @override
   Widget build(BuildContext context) {
+
+    final authService = Provider.of<AuthService>(context);
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 30),
       child: Column(
@@ -77,10 +84,16 @@ class _FormState extends State<_Form> {
             isPassword: true,
           ),
           CustomBotton(
-              text: 'Ingresar',
-              onPressed: (){
-                print(emailController.text);
-                print(passwordController.text);
+            text: 'Ingresar',
+            onPressed: authService.loading
+              ? null
+              : () async{
+                bool registerStatus = await authService.register(nameController.text.trim(), emailController.text.trim(), passwordController.text.trim());
+                if(registerStatus){
+                  Navigator.pushReplacementNamed(context, 'users');
+                } else{
+                  showAlert(context, 'Intente de nuevo', 'Hubo un error al crear su usuario, por favor intentelo más tarde');
+                }
               }
           )
         ],

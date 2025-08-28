@@ -1,7 +1,11 @@
+import 'package:chat_app/helpers/alert.dart';
+import 'package:chat_app/services/auth_service.dart';
 import 'package:chat_app/widgets/custom_botton.dart';
 import 'package:chat_app/widgets/custom_input.dart';
 import 'package:chat_app/widgets/header.dart';
+import 'package:chat_app/widgets/label.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -20,7 +24,7 @@ class LoginPage extends StatelessWidget {
               children: [
                 Header(title: 'Message'),
                 _Form(),
-                _Labels(),
+                Label(title: 'Aún no tienes una cuenta?', subtitle: 'Registrate ahora!', route: 'register'),
                 Container(
                   margin: EdgeInsets.only(bottom: 15),
                   child: Text(
@@ -54,6 +58,9 @@ class _FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+
+    final authService = Provider.of<AuthService>(context);
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 30),
       child: Column(
@@ -72,46 +79,17 @@ class _FormState extends State<_Form> {
           ),
           CustomBotton(
             text: 'Ingresar',
-            onPressed: (){
-              print(emailController.text);
-              print(passwordController.text);
+            onPressed: authService.loading
+              ? null
+              : () async{
+                FocusScope.of(context).unfocus();
+                final loginStatus = await authService.login(emailController.text.trim(), passwordController.text.trim());
+                if(loginStatus){
+                  Navigator.pushReplacementNamed(context, 'users');
+                } else{
+                  showAlert(context, 'Credenciales incorrectas', 'Revise sus credenciales nuevamente.');
+                }
             }
-          )
-        ],
-      ),
-    );
-  }
-}
-
-class _Labels extends StatelessWidget {
-  const _Labels({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          Text(
-            '¿No tienes cuenta?',
-            style: TextStyle(
-              color: Colors.black54,
-              fontSize: 15,
-              fontWeight: FontWeight.w300
-            )
-          ),
-          SizedBox(height: 10,),
-          GestureDetector(
-            onTap: (){
-              Navigator.pushReplacementNamed(context, 'register');
-            },
-            child: Text(
-            'Crea una ahora!',
-              style: TextStyle(
-                color: Colors.blue[600],
-                fontSize: 18,
-                fontWeight: FontWeight.bold
-              ),
-            ),
           )
         ],
       ),
