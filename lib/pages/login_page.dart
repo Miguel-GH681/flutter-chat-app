@@ -1,5 +1,6 @@
 import 'package:chat_app/helpers/alert.dart';
 import 'package:chat_app/services/auth_service.dart';
+import 'package:chat_app/services/socket_service.dart';
 import 'package:chat_app/widgets/custom_botton.dart';
 import 'package:chat_app/widgets/custom_input.dart';
 import 'package:chat_app/widgets/header.dart';
@@ -60,6 +61,7 @@ class _FormState extends State<_Form> {
   Widget build(BuildContext context) {
 
     final authService = Provider.of<AuthService>(context);
+    final socketService = Provider.of<SocketService>(context);
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 30),
@@ -85,6 +87,7 @@ class _FormState extends State<_Form> {
                 FocusScope.of(context).unfocus();
                 final loginStatus = await authService.login(emailController.text.trim(), passwordController.text.trim());
                 if(loginStatus){
+                  socketService.connect();
                   Navigator.pushReplacementNamed(context, 'users');
                 } else{
                   showAlert(context, 'Credenciales incorrectas', 'Revise sus credenciales nuevamente.');
